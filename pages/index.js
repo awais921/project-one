@@ -513,10 +513,35 @@ export default function Home() {
             </h3>
 
             <ul className="space-y-3 text-zinc-400">
-              <li>Privacy Policy</li>
-              <li>Terms & Conditions</li>
-              <li>Cookies Policy</li>
-            </ul>
+
+  <li>
+    <a
+      href="/privacy-policy"
+      className="hover:text-pink-500 transition"
+    >
+      Privacy Policy
+    </a>
+  </li>
+
+  <li>
+    <a
+      href="/terms-and-conditions"
+      className="hover:text-pink-500 transition"
+    >
+      Terms & Conditions
+    </a>
+  </li>
+
+  <li>
+    <a
+      href="#"
+      className="hover:text-pink-500 transition"
+    >
+      Cookies Policy
+    </a>
+  </li>
+
+</ul>
 
           </div>
 
