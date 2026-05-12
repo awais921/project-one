@@ -498,11 +498,44 @@ export default function Home() {
             </h3>
 
             <ul className="space-y-3 text-zinc-400">
-              <li>Home</li>
-              <li>Features</li>
-              <li>Styles</li>
-              <li>FAQ</li>
-            </ul>
+
+  <li>
+    <a
+      href="/"
+      className="hover:text-pink-500 transition"
+    >
+      Home
+    </a>
+  </li>
+
+  <li>
+    <a
+      href="#features"
+      className="hover:text-pink-500 transition"
+    >
+      Features
+    </a>
+  </li>
+
+  <li>
+    <a
+      href="#styles"
+      className="hover:text-pink-500 transition"
+    >
+      Styles
+    </a>
+  </li>
+
+  <li>
+    <a
+      href="#faq"
+      className="hover:text-pink-500 transition"
+    >
+      FAQ
+    </a>
+  </li>
+
+</ul>
 
           </div>
 
