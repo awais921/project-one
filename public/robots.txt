@@ -1,9 +1,4 @@
 User-agent: *
 Allow: /
 
-# Block unnecessary crawling paths
-Disallow: /api/
-Disallow: /admin/
-
-# Sitemap location
 Sitemap: https://project-one-live.vercel.app/sitemap.xml
