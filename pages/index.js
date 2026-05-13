@@ -24,7 +24,13 @@ export default function Home() {
             <a href="#faq" className="hover:text-pink-500 transition">
               FAQ
             </a>
+            <a href="/about" className="hover:text-pink-500 transition">
+  About
+</a>
 
+<a href="/contact" className="hover:text-pink-500 transition">
+  Contact
+</a>
             <a href="#contact" className="hover:text-pink-500 transition">
               Contact
             </a>
