@@ -16,7 +16,9 @@ export default function Home() {
             <a href="#features" className="hover:text-pink-500 transition">
               Features
             </a>
-
+            <a href="#styles" className="hover:text-pink-500 transition">
+  Styles
+</a>
             
 
             <a href="#faq" className="hover:text-pink-500 transition">
