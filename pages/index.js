@@ -29,9 +29,7 @@ export default function Home() {
 <a href="/contact" className="hover:text-pink-500 transition">
   Contact
 </a>
-            <a href="#contact" className="hover:text-pink-500 transition">
-              Contact
-            </a>
+            
           </nav>
 
           <button className="bg-pink-600 hover:bg-pink-700 transition px-5 py-3 rounded-2xl font-semibold">
