@@ -5,12 +5,12 @@ export default function Home() {
   const [generatedImage, setGeneratedImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // ✅ FIX: file object store کرو
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
 
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setImage(imageUrl);
+      setImage(file);
     }
   };
 
@@ -47,8 +47,7 @@ export default function Home() {
     <div
       style={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(to bottom right, #000000, #111111, #1a1a1a)",
+        background: "linear-gradient(to bottom right, #000000, #111111, #1a1a1a)",
         color: "#fff",
         fontFamily: "Arial",
       }}
@@ -65,63 +64,31 @@ export default function Home() {
         <h2>AI Fashion Generator</h2>
 
         <div style={{ display: "flex", gap: "20px" }}>
-          <a href="/" style={{ color: "#fff" }}>
-            Home
-          </a>
-
-          <a href="/about" style={{ color: "#fff" }}>
-            About
-          </a>
-
-          <a href="/contact" style={{ color: "#fff" }}>
-            Contact
-          </a>
+          <a href="/" style={{ color: "#fff" }}>Home</a>
+          <a href="/about" style={{ color: "#fff" }}>About</a>
+          <a href="/contact" style={{ color: "#fff" }}>Contact</a>
         </div>
       </nav>
 
-      <div
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-          padding: "80px 20px",
-          textAlign: "center",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "60px",
-            marginBottom: "20px",
-          }}
-        >
+      <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "80px 20px", textAlign: "center" }}>
+        
+        <h1 style={{ fontSize: "60px", marginBottom: "20px" }}>
           Premium AI Fashion Generator
         </h1>
 
-        <p
-          style={{
-            fontSize: "20px",
-            color: "#cccccc",
-            marginBottom: "40px",
-            lineHeight: "1.7",
-          }}
-        >
-          Upload your photo and generate luxury celebrity-inspired AI fashion
-          transformations instantly.
+        <p style={{ fontSize: "20px", color: "#cccccc", marginBottom: "40px", lineHeight: "1.7" }}>
+          Upload your photo and generate luxury celebrity-inspired AI fashion transformations instantly.
         </p>
 
         <input type="file" accept="image/*" onChange={handleImageUpload} />
 
-        <br />
-        <br />
+        <br /><br />
 
         {image && (
           <img
-            src={image}
+            src={URL.createObjectURL(image)}
             alt="Preview"
-            style={{
-              width: "300px",
-              borderRadius: "20px",
-              marginBottom: "30px",
-            }}
+            style={{ width: "300px", borderRadius: "20px", marginBottom: "30px" }}
           />
         )}
 
@@ -154,15 +121,11 @@ export default function Home() {
             <img
               src={generatedImage}
               alt="Generated"
-              style={{
-                width: "350px",
-                borderRadius: "20px",
-                marginTop: "20px",
-              }}
+              style={{ width: "350px", borderRadius: "20px", marginTop: "20px" }}
             />
           </div>
         )}
       </div>
     </div>
   );
-    }
+  }
