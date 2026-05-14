@@ -10,24 +10,16 @@ export default function Home() {
 
     if (file) {
       setImage(URL.createObjectURL(file));
-      setGeneratedImage(null);
     }
   };
 
   const handleGenerate = async () => {
-    if (!image) return;
-
     setLoading(true);
+    setGeneratedImage(null);
 
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          image: image,
-        }),
       });
 
       const data = await response.json();
@@ -46,41 +38,32 @@ export default function Home() {
     <div
       style={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(to bottom right, #000000, #111111, #1a1a1a)",
+        background: "#000",
         color: "#fff",
         fontFamily: "Arial",
+        paddingBottom: "50px",
       }}
     >
       <nav
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
           padding: "20px 40px",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-          backdropFilter: "blur(10px)",
+          borderBottom: "1px solid #222",
         }}
       >
-        <h2
-          style={{
-            fontSize: "28px",
-            fontWeight: "bold",
-          }}
-        >
-          AI Fashion Generator
-        </h2>
+        <h2>AI Fashion Generator</h2>
 
-        <div style={{ display: "flex", gap: "25px" }}>
-          <a href="/" style={{ color: "#fff", textDecoration: "none" }}>
+        <div style={{ display: "flex", gap: "20px" }}>
+          <a href="/" style={{ color: "#fff" }}>
             Home
           </a>
 
-          <a href="/about" style={{ color: "#fff", textDecoration: "none" }}>
+          <a href="/about" style={{ color: "#fff" }}>
             About
           </a>
 
-          <a href="/contact" style={{ color: "#fff", textDecoration: "none" }}>
+          <a href="/contact" style={{ color: "#fff" }}>
             Contact
           </a>
         </div>
@@ -88,20 +71,16 @@ export default function Home() {
 
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
+          maxWidth: "900px",
+          margin: "0 auto",
           textAlign: "center",
-          padding: "100px 20px",
+          padding: "60px 20px",
         }}
       >
         <h1
           style={{
-            fontSize: "65px",
-            fontWeight: "bold",
-            marginBottom: "25px",
-            maxWidth: "900px",
+            fontSize: "60px",
+            marginBottom: "20px",
           }}
         >
           Premium AI Fashion Generator
@@ -109,97 +88,71 @@ export default function Home() {
 
         <p
           style={{
-            maxWidth: "800px",
-            fontSize: "22px",
-            color: "#cccccc",
-            lineHeight: "1.8",
-            marginBottom: "50px",
+            color: "#ccc",
+            fontSize: "20px",
+            lineHeight: "1.7",
+            marginBottom: "40px",
           }}
         >
           Upload your photo and create luxury celebrity-inspired AI fashion
           transformations instantly using advanced artificial intelligence.
         </p>
 
-        <div
-          style={{
-            background: "rgba(255,255,255,0.05)",
-            padding: "40px",
-            borderRadius: "25px",
-            border: "1px solid rgba(255,255,255,0.1)",
-            backdropFilter: "blur(15px)",
-            width: "100%",
-            maxWidth: "600px",
-          }}
-        >
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
+        <input type="file" accept="image/*" onChange={handleImageUpload} />
+
+        <br />
+        <br />
+
+        {image && (
+          <img
+            src={image}
+            alt="Preview"
             style={{
-              color: "#fff",
+              width: "300px",
+              borderRadius: "20px",
               marginBottom: "30px",
             }}
           />
+        )}
 
-          {image && (
-            <div>
-              <img
-                src={image}
-                alt="Preview"
-                style={{
-                  width: "100%",
-                  maxWidth: "350px",
-                  borderRadius: "20px",
-                  border: "3px solid #ffffff",
-                  marginBottom: "30px",
-                }}
-              />
+        <br />
 
-              <button
-                onClick={handleGenerate}
-                style={{
-                  padding: "15px 40px",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  borderRadius: "12px",
-                  border: "none",
-                  cursor: "pointer",
-                  background:
-                    "linear-gradient(to right, #ffffff, #cccccc)",
-                  color: "#000",
-                }}
-              >
-                Generate AI Fashion
-              </button>
-            </div>
-          )}
+        <button
+          onClick={handleGenerate}
+          style={{
+            padding: "15px 35px",
+            fontSize: "18px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            borderRadius: "10px",
+            border: "none",
+          }}
+        >
+          Generate AI Fashion
+        </button>
 
-          {loading && (
-            <div style={{ marginTop: "40px" }}>
-              <h2>Generating Premium AI Fashion...</h2>
-            </div>
-          )}
+        {loading && (
+          <div style={{ marginTop: "40px" }}>
+            <h2>Generating AI Fashion...</h2>
+          </div>
+        )}
 
-          {!loading && generatedImage && (
-            <div style={{ marginTop: "40px" }}>
-              <h2 style={{ marginBottom: "20px" }}>
-                AI Fashion Result
-              </h2>
+        {generatedImage && (
+          <div style={{ marginTop: "50px" }}>
+            <h2>AI Fashion Result</h2>
 
-              <img
-                src={generatedImage}
-                alt="AI Result"
-                style={{
-                  width: "100%",
-                  maxWidth: "350px",
-                  borderRadius: "20px",
-                  border: "3px solid #00ff99",
-                }}
-              />
-            </div>
-          )}
-        </div>
+            <img
+              src={generatedImage}
+              alt="AI Result"
+              style={{
+                width: "350px",
+                borderRadius: "20px",
+                marginTop: "20px",
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
-            }
+    }
