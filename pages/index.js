@@ -24,7 +24,8 @@ export default function Home() {
     <div
       style={{
         minHeight: "100vh",
-        backgroundColor: "#000",
+        background:
+          "linear-gradient(to bottom right, #000000, #111111, #1a1a1a)",
         color: "#fff",
         fontFamily: "Arial",
       }}
@@ -35,12 +36,20 @@ export default function Home() {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "20px 40px",
-          borderBottom: "1px solid #333",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          backdropFilter: "blur(10px)",
         }}
       >
-        <h2>AI Fashion Generator</h2>
+        <h2
+          style={{
+            fontSize: "28px",
+            fontWeight: "bold",
+          }}
+        >
+          AI Fashion Generator
+        </h2>
 
-        <div style={{ display: "flex", gap: "20px" }}>
+        <div style={{ display: "flex", gap: "25px" }}>
           <a href="/" style={{ color: "#fff", textDecoration: "none" }}>
             Home
           </a>
@@ -62,30 +71,44 @@ export default function Home() {
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
-          padding: "80px 20px",
+          padding: "100px 20px",
         }}
       >
         <h1
           style={{
-            fontSize: "55px",
-            marginBottom: "20px",
+            fontSize: "65px",
+            fontWeight: "bold",
+            marginBottom: "25px",
+            maxWidth: "900px",
           }}
         >
-          AI Fashion Generator
+          Premium AI Fashion Generator
         </h1>
 
         <p
           style={{
-            maxWidth: "700px",
-            fontSize: "20px",
-            color: "#ccc",
-            lineHeight: "1.7",
+            maxWidth: "800px",
+            fontSize: "22px",
+            color: "#cccccc",
+            lineHeight: "1.8",
+            marginBottom: "50px",
           }}
         >
-          Upload your image and generate premium AI fashion transformations instantly.
+          Upload your photo and create luxury celebrity-inspired AI fashion
+          transformations instantly using advanced artificial intelligence.
         </p>
 
-        <div style={{ marginTop: "40px" }}>
+        <div
+          style={{
+            background: "rgba(255,255,255,0.05)",
+            padding: "40px",
+            borderRadius: "25px",
+            border: "1px solid rgba(255,255,255,0.1)",
+            backdropFilter: "blur(15px)",
+            width: "100%",
+            maxWidth: "600px",
+          }}
+        >
           <input
             type="file"
             accept="image/*"
@@ -102,46 +125,51 @@ export default function Home() {
                 src={image}
                 alt="Preview"
                 style={{
-                  width: "300px",
+                  width: "100%",
+                  maxWidth: "350px",
                   borderRadius: "20px",
-                  border: "3px solid white",
+                  border: "3px solid #ffffff",
                   marginBottom: "30px",
                 }}
               />
 
-              <div>
-                <button
-                  onClick={generateAI}
-                  style={{
-                    padding: "15px 40px",
-                    fontSize: "18px",
-                    borderRadius: "10px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                  }}
-                >
-                  Generate AI Fashion
-                </button>
-              </div>
+              <button
+                onClick={generateAI}
+                style={{
+                  padding: "15px 40px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  borderRadius: "12px",
+                  border: "none",
+                  cursor: "pointer",
+                  background:
+                    "linear-gradient(to right, #ffffff, #cccccc)",
+                  color: "#000",
+                }}
+              >
+                Generate AI Fashion
+              </button>
             </div>
           )}
 
           {loading && (
             <div style={{ marginTop: "40px" }}>
-              <h2>Generating AI Fashion...</h2>
+              <h2>Generating Premium AI Fashion...</h2>
             </div>
           )}
 
           {!loading && image && (
             <div style={{ marginTop: "40px" }}>
-              <h2>AI Result Preview</h2>
+              <h2 style={{ marginBottom: "20px" }}>
+                AI Fashion Result
+              </h2>
 
               <img
                 src={image}
                 alt="AI Result"
                 style={{
-                  width: "300px",
+                  width: "100%",
+                  maxWidth: "350px",
                   borderRadius: "20px",
                   border: "3px solid #00ff99",
                 }}
@@ -152,4 +180,4 @@ export default function Home() {
       </div>
     </div>
   );
-        }
+}
