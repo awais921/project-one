@@ -2,6 +2,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -9,6 +10,14 @@ export default function Home() {
     if (file) {
       setImage(URL.createObjectURL(file));
     }
+  };
+
+  const generateAI = () => {
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 3000);
   };
 
   return (
@@ -73,7 +82,7 @@ export default function Home() {
             lineHeight: "1.7",
           }}
         >
-          Upload your image and preview your AI fashion transformation instantly.
+          Upload your image and generate premium AI fashion transformations instantly.
         </p>
 
         <div style={{ marginTop: "40px" }}>
@@ -96,6 +105,45 @@ export default function Home() {
                   width: "300px",
                   borderRadius: "20px",
                   border: "3px solid white",
+                  marginBottom: "30px",
+                }}
+              />
+
+              <div>
+                <button
+                  onClick={generateAI}
+                  style={{
+                    padding: "15px 40px",
+                    fontSize: "18px",
+                    borderRadius: "10px",
+                    border: "none",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Generate AI Fashion
+                </button>
+              </div>
+            </div>
+          )}
+
+          {loading && (
+            <div style={{ marginTop: "40px" }}>
+              <h2>Generating AI Fashion...</h2>
+            </div>
+          )}
+
+          {!loading && image && (
+            <div style={{ marginTop: "40px" }}>
+              <h2>AI Result Preview</h2>
+
+              <img
+                src={image}
+                alt="AI Result"
+                style={{
+                  width: "300px",
+                  borderRadius: "20px",
+                  border: "3px solid #00ff99",
                 }}
               />
             </div>
