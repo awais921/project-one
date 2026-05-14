@@ -3,8 +3,8 @@ import { useState } from "react";
 export default function Home() {
   const [image, setImage] = useState(null);
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
 
     if (file) {
       setImage(URL.createObjectURL(file));
@@ -12,18 +12,24 @@ export default function Home() {
   };
 
   return (
-    <>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#000",
+        color: "#fff",
+        fontFamily: "Arial",
+      }}
+    >
       <nav
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           padding: "20px 40px",
-          background: "#111",
           borderBottom: "1px solid #333",
         }}
       >
-        <h2 style={{ color: "#fff" }}>AI Fashion Generator</h2>
+        <h2>AI Fashion Generator</h2>
 
         <div style={{ display: "flex", gap: "20px" }}>
           <a href="/" style={{ color: "#fff", textDecoration: "none" }}>
@@ -40,69 +46,62 @@ export default function Home() {
         </div>
       </nav>
 
-      <main
+      <div
         style={{
-          minHeight: "100vh",
-          background: "#000",
-          color: "#fff",
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
           textAlign: "center",
-          padding: "40px",
+          padding: "80px 20px",
         }}
       >
-        <div>
-          <h1
+        <h1
+          style={{
+            fontSize: "55px",
+            marginBottom: "20px",
+          }}
+        >
+          AI Fashion Generator
+        </h1>
+
+        <p
+          style={{
+            maxWidth: "700px",
+            fontSize: "20px",
+            color: "#ccc",
+            lineHeight: "1.7",
+          }}
+        >
+          Upload your image and preview your AI fashion transformation instantly.
+        </p>
+
+        <div style={{ marginTop: "40px" }}>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
             style={{
-              fontSize: "60px",
-              fontWeight: "bold",
-              marginBottom: "20px",
+              color: "#fff",
+              marginBottom: "30px",
             }}
-          >
-            AI Fashion Generator
-          </h1>
+          />
 
-          <p
-            style={{
-              fontSize: "20px",
-              maxWidth: "800px",
-              margin: "0 auto",
-              lineHeight: "1.8",
-              color: "#ccc",
-            }}
-          >
-            Upload your photo and generate celebrity-inspired AI fashion looks instantly.
-          </p>
-
-          <div style={{ marginTop: "40px" }}>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              style={{
-                marginBottom: "20px",
-                color: "#fff",
-              }}
-            />
-
-            {image && (
-              <div>
-                <img
-                  src={image}
-                  alt="Preview"
-                  style={{
-                    width: "300px",
-                    borderRadius: "20px",
-                    marginTop: "20px",
-                    border: "3px solid #fff",
-                  }}
-                />
-              </div>
-            )}
-          </div>
+          {image && (
+            <div>
+              <img
+                src={image}
+                alt="Preview"
+                style={{
+                  width: "300px",
+                  borderRadius: "20px",
+                  border: "3px solid white",
+                }}
+              />
+            </div>
+          )}
         </div>
-      </main>
-    </>
+      </div>
+    </div>
   );
-}
+          }
