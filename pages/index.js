@@ -9,17 +9,26 @@ export default function Home() {
     const file = event.target.files[0];
 
     if (file) {
-      setImage(URL.createObjectURL(file));
+      const imageUrl = URL.createObjectURL(file);
+      setImage(imageUrl);
     }
   };
 
   const handleGenerate = async () => {
+    if (!image) return;
+
     setLoading(true);
     setGeneratedImage(null);
 
     try {
       const response = await fetch("/api/generate", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image: image,
+        }),
       });
 
       const data = await response.json();
@@ -38,18 +47,19 @@ export default function Home() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#000",
+        background:
+          "linear-gradient(to bottom right, #000000, #111111, #1a1a1a)",
         color: "#fff",
         fontFamily: "Arial",
-        paddingBottom: "50px",
       }}
     >
       <nav
         style={{
           display: "flex",
           justifyContent: "space-between",
+          alignItems: "center",
           padding: "20px 40px",
-          borderBottom: "1px solid #222",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
         }}
       >
         <h2>AI Fashion Generator</h2>
@@ -71,10 +81,10 @@ export default function Home() {
 
       <div
         style={{
-          maxWidth: "900px",
+          maxWidth: "1000px",
           margin: "0 auto",
+          padding: "80px 20px",
           textAlign: "center",
-          padding: "60px 20px",
         }}
       >
         <h1
@@ -88,14 +98,14 @@ export default function Home() {
 
         <p
           style={{
-            color: "#ccc",
             fontSize: "20px",
-            lineHeight: "1.7",
+            color: "#cccccc",
             marginBottom: "40px",
+            lineHeight: "1.7",
           }}
         >
-          Upload your photo and create luxury celebrity-inspired AI fashion
-          transformations instantly using advanced artificial intelligence.
+          Upload your photo and generate luxury celebrity-inspired AI fashion
+          transformations instantly.
         </p>
 
         <input type="file" accept="image/*" onChange={handleImageUpload} />
@@ -120,12 +130,12 @@ export default function Home() {
         <button
           onClick={handleGenerate}
           style={{
-            padding: "15px 35px",
+            padding: "15px 40px",
             fontSize: "18px",
             fontWeight: "bold",
-            cursor: "pointer",
-            borderRadius: "10px",
+            borderRadius: "12px",
             border: "none",
+            cursor: "pointer",
           }}
         >
           Generate AI Fashion
@@ -143,7 +153,7 @@ export default function Home() {
 
             <img
               src={generatedImage}
-              alt="AI Result"
+              alt="Generated"
               style={{
                 width: "350px",
                 borderRadius: "20px",
