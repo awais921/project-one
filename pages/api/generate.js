@@ -6,6 +6,13 @@ export default async function handler(req, res) {
   try {
     const { image } = req.body;
 
+    if (!image) {
+      return res.status(400).json({
+        success: false,
+        error: "Image is required",
+      });
+    }
+
     const replicateRes = await fetch(
       "https://api.replicate.com/v1/predictions",
       {
@@ -18,7 +25,7 @@ export default async function handler(req, res) {
           version:
             "ac732df83cea7fff0902a97d663e1a3a4b9c35f15f1f1ba3a5f5be4d2d7f1c52",
           input: {
-            image: image, // Cloudinary URL ✔
+            image,
             prompt:
               "luxury fashion photoshoot, ultra realistic, cinematic lighting",
           },
@@ -73,4 +80,4 @@ export default async function handler(req, res) {
       error: err.message,
     });
   }
-         
+        }
