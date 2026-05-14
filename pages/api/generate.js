@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      "https://api.replicate.com/v1/predictions",
+      "https://api.replicate.com/v1/models/black-forest-labs/flux-schnell/predictions",
       {
         method: "POST",
         headers: {
@@ -15,11 +15,9 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          version:
-            "ac732df83cea7fff0902a97d663e1a3a4b9c35f15f1f1ba3a5f5be4d2d7f1c52",
           input: {
             prompt:
-              "luxury celebrity fashion outfit, ultra realistic, cinematic lighting, premium influencer fashion, high detail",
+              "Luxury celebrity fashion photoshoot, premium designer outfit, ultra realistic, cinematic lighting, influencer fashion, highly detailed",
           },
         }),
       }
@@ -27,29 +25,22 @@ export default async function handler(req, res) {
 
     const prediction = await response.json();
 
-    let imageUrl =
-      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b";
+    let outputUrl = "";
 
     if (prediction?.urls?.get) {
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < 20; i++) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        const resultResponse = await fetch(prediction.urls.get, {
+        const result = await fetch(prediction.urls.get, {
           headers: {
             Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
           },
         });
 
-        const resultData = await resultResponse.json();
+        const resultData = await result.json();
 
         if (resultData.status === "succeeded") {
-          if (
-            Array.isArray(resultData.output) &&
-            resultData.output.length > 0
-          ) {
-            imageUrl = resultData.output[0];
-          }
-
+          outputUrl = resultData.output[0];
           break;
         }
       }
@@ -57,7 +48,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       success: true,
-      result: imageUrl,
+      result: outputUrl,
     });
   } catch (error) {
     return res.status(500).json({
@@ -65,4 +56,4 @@ export default async function handler(req, res) {
       error: "AI generation failed",
     });
   }
-          }
+    }
