@@ -169,9 +169,19 @@ export default function Home() {
               JPG, PNG supported • AI fashion generation ready
             </p>
 
-            <button className="bg-pink-600 hover:bg-pink-700 transition px-10 py-5 rounded-2xl text-lg font-bold">
-              Choose Image
-            </button>
+            <div className="flex flex-col items-center gap-6">
+
+  <label className="bg-pink-600 hover:bg-pink-700 transition px-10 py-5 rounded-2xl text-lg font-bold cursor-pointer">
+    Choose Image
+
+    <input
+      type="file"
+      accept="image/*"
+      className="hidden"
+    />
+  </label>
+
+</div>
 
           </div>
 
