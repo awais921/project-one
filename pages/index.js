@@ -1,4 +1,16 @@
+import { useState } from "react";
+
 export default function Home() {
+  const [image, setImage] = useState(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+      setImage(URL.createObjectURL(file));
+    }
+  };
+
   return (
     <>
       <nav
@@ -14,39 +26,16 @@ export default function Home() {
         <h2 style={{ color: "#fff" }}>AI Fashion Generator</h2>
 
         <div style={{ display: "flex", gap: "20px" }}>
-          <a
-            href="/"
-            style={{ color: "#fff", textDecoration: "none" }}
-          >
+          <a href="/" style={{ color: "#fff", textDecoration: "none" }}>
             Home
           </a>
 
-          <a
-            href="/about"
-            style={{ color: "#fff", textDecoration: "none" }}
-          >
+          <a href="/about" style={{ color: "#fff", textDecoration: "none" }}>
             About
           </a>
 
-          <a
-            href="/contact"
-            style={{ color: "#fff", textDecoration: "none" }}
-          >
+          <a href="/contact" style={{ color: "#fff", textDecoration: "none" }}>
             Contact
-          </a>
-
-          <a
-            href="/privacy-policy"
-            style={{ color: "#fff", textDecoration: "none" }}
-          >
-            Privacy
-          </a>
-
-          <a
-            href="/terms-and-conditions"
-            style={{ color: "#fff", textDecoration: "none" }}
-          >
-            Terms
           </a>
         </div>
       </nav>
@@ -83,28 +72,37 @@ export default function Home() {
               color: "#ccc",
             }}
           >
-            Create celebrity-inspired outfits, luxury fashion looks,
-            influencer aesthetics, viral AI styles, and premium outfit
-            transformations instantly using artificial intelligence.
+            Upload your photo and generate celebrity-inspired AI fashion looks instantly.
           </p>
 
-          <button
-            style={{
-              marginTop: "40px",
-              padding: "15px 40px",
-              fontSize: "18px",
-              background: "#fff",
-              color: "#000",
-              border: "none",
-              borderRadius: "10px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            Upload Your Photo
-          </button>
+          <div style={{ marginTop: "40px" }}>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              style={{
+                marginBottom: "20px",
+                color: "#fff",
+              }}
+            />
+
+            {image && (
+              <div>
+                <img
+                  src={image}
+                  alt="Preview"
+                  style={{
+                    width: "300px",
+                    borderRadius: "20px",
+                    marginTop: "20px",
+                    border: "3px solid #fff",
+                  }}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </main>
     </>
   );
-              }
+}
