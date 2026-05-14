@@ -2,6 +2,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [image, setImage] = useState(null);
+  const [generatedImage, setGeneratedImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (event) => {
@@ -9,15 +10,36 @@ export default function Home() {
 
     if (file) {
       setImage(URL.createObjectURL(file));
+      setGeneratedImage(null);
     }
   };
 
-  const generateAI = () => {
+  const handleGenerate = async () => {
+    if (!image) return;
+
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-    }, 3000);
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image: image,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setGeneratedImage(data.result);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -134,7 +156,7 @@ export default function Home() {
               />
 
               <button
-                onClick={generateAI}
+                onClick={handleGenerate}
                 style={{
                   padding: "15px 40px",
                   fontSize: "18px",
@@ -158,14 +180,14 @@ export default function Home() {
             </div>
           )}
 
-          {!loading && image && (
+          {!loading && generatedImage && (
             <div style={{ marginTop: "40px" }}>
               <h2 style={{ marginBottom: "20px" }}>
                 AI Fashion Result
               </h2>
 
               <img
-                src={image}
+                src={generatedImage}
                 alt="AI Result"
                 style={{
                   width: "100%",
@@ -180,4 +202,4 @@ export default function Home() {
       </div>
     </div>
   );
-}
+  }
