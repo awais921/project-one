@@ -59,8 +59,15 @@ export default async function handler(req, res) {
 
       const pollData = await pollResponse.json();
 
+      console.log("POLL DATA:", pollData);
+
       if (pollData.status === "succeeded") {
-        finalResult = pollData.output?.[0];
+        finalResult = Array.isArray(pollData.output)
+          ? pollData.output[0]
+          : pollData.output;
+
+        console.log("FINAL RESULT:", finalResult);
+
         break;
       }
 
