@@ -1,131 +1,89 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [image, setImage] = useState(null);
-  const [generatedImage, setGeneratedImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ FIX: file object store کرو
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
+  const handleUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-    if (file) {
-      setImage(file);
-    }
+    setImageFile(file);
+    setPreview(URL.createObjectURL(file));
   };
 
   const handleGenerate = async () => {
-    if (!image) return;
+    if (!imageFile) return;
 
     setLoading(true);
-    setGeneratedImage(null);
+    setResult(null);
 
     try {
-      const response = await fetch("/api/generate", {
+      // Step 1: upload image to Cloudinary
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      formData.append("upload_preset", "project_one_upload"); // your preset
+
+      const cloudRes = await fetch(
+        "https://api.cloudinary.com/v1_1/duhksrhsr/image/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const cloudData = await cloudRes.json();
+      const imageUrl = cloudData.secure_url;
+
+      // Step 2: send to AI API
+      const res = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          image: image,
-        }),
+        body: JSON.stringify({ image: imageUrl }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
       if (data.success) {
-        setGeneratedImage(data.result);
+        setResult(data.result);
+      } else {
+        console.log(data.error);
       }
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
     }
 
     setLoading(false);
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(to bottom right, #000000, #111111, #1a1a1a)",
-        color: "#fff",
-        fontFamily: "Arial",
-      }}
-    >
-      <nav
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "20px 40px",
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-        }}
-      >
-        <h2>AI Fashion Generator</h2>
+    <div style={{ padding: 40, color: "white", background: "#111", minHeight: "100vh" }}>
+      <h1>AI Fashion Generator</h1>
 
-        <div style={{ display: "flex", gap: "20px" }}>
-          <a href="/" style={{ color: "#fff" }}>Home</a>
-          <a href="/about" style={{ color: "#fff" }}>About</a>
-          <a href="/contact" style={{ color: "#fff" }}>Contact</a>
+      <input type="file" accept="image/*" onChange={handleUpload} />
+
+      {preview && (
+        <img src={preview} width="200" style={{ marginTop: 20 }} />
+      )}
+
+      <br />
+
+      <button onClick={handleGenerate} style={{ marginTop: 20 }}>
+        Generate AI Fashion
+      </button>
+
+      {loading && <p>Generating...</p>}
+
+      {result && (
+        <div>
+          <h3>Result</h3>
+          <img src={result} width="300" />
         </div>
-      </nav>
-
-      <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "80px 20px", textAlign: "center" }}>
-        
-        <h1 style={{ fontSize: "60px", marginBottom: "20px" }}>
-          Premium AI Fashion Generator
-        </h1>
-
-        <p style={{ fontSize: "20px", color: "#cccccc", marginBottom: "40px", lineHeight: "1.7" }}>
-          Upload your photo and generate luxury celebrity-inspired AI fashion transformations instantly.
-        </p>
-
-        <input type="file" accept="image/*" onChange={handleImageUpload} />
-
-        <br /><br />
-
-        {image && (
-          <img
-            src={URL.createObjectURL(image)}
-            alt="Preview"
-            style={{ width: "300px", borderRadius: "20px", marginBottom: "30px" }}
-          />
-        )}
-
-        <br />
-
-        <button
-          onClick={handleGenerate}
-          style={{
-            padding: "15px 40px",
-            fontSize: "18px",
-            fontWeight: "bold",
-            borderRadius: "12px",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Generate AI Fashion
-        </button>
-
-        {loading && (
-          <div style={{ marginTop: "40px" }}>
-            <h2>Generating AI Fashion...</h2>
-          </div>
-        )}
-
-        {generatedImage && (
-          <div style={{ marginTop: "50px" }}>
-            <h2>AI Fashion Result</h2>
-
-            <img
-              src={generatedImage}
-              alt="Generated"
-              style={{ width: "350px", borderRadius: "20px", marginTop: "20px" }}
-            />
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
   }
