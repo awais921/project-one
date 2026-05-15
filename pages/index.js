@@ -21,10 +21,10 @@ export default function Home() {
     setResult(null);
 
     try {
-      // Step 1: upload image to Cloudinary
+      // upload image to Cloudinary
       const formData = new FormData();
       formData.append("file", imageFile);
-      formData.append("upload_preset", "project_one_upload"); // your preset
+      formData.append("upload_preset", "project_one_upload");
 
       const cloudRes = await fetch(
         "https://api.cloudinary.com/v1_1/duhksrhsr/image/upload",
@@ -37,7 +37,7 @@ export default function Home() {
       const cloudData = await cloudRes.json();
       const imageUrl = cloudData.secure_url;
 
-      // Step 2: send to AI API
+      // send to backend API
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: {
@@ -48,11 +48,9 @@ export default function Home() {
 
       const data = await res.json();
 
-      if (data.success) {
-        setResult(data.result);
-      } else {
-        console.log(data.error);
-      }
+      // 🔥 IMPORTANT LINE (RESULT SHOW)
+      setResult(data.result);
+
     } catch (err) {
       console.log(err);
     }
@@ -61,29 +59,43 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: 40, color: "white", background: "#111", minHeight: "100vh" }}>
+    <div style={{ padding: 40, color: "white", background: "#111", minHeight: "100vh", textAlign: "center" }}>
+      
       <h1>AI Fashion Generator</h1>
 
+      {/* Upload */}
       <input type="file" accept="image/*" onChange={handleUpload} />
 
+      <br /><br />
+
+      {/* Original Image */}
       {preview && (
-        <img src={preview} width="200" style={{ marginTop: 20 }} />
+        <div>
+          <h3>Original Image</h3>
+          <img src={preview} width="220" />
+        </div>
       )}
 
       <br />
 
-      <button onClick={handleGenerate} style={{ marginTop: 20 }}>
-        Generate AI Fashion
+      {/* Button */}
+      <button onClick={handleGenerate}>
+        {loading ? "Generating..." : "Generate AI Fashion"}
       </button>
 
-      {loading && <p>Generating...</p>}
+      <br /><br />
 
+      {/* Loading */}
+      {loading && <p>Generating AI image...</p>}
+
+      {/* AI Result */}
       {result && (
         <div>
-          <h3>Result</h3>
-          <img src={result} width="300" />
+          <h3>AI Result</h3>
+          <img src={result} width="220" />
         </div>
       )}
+
     </div>
   );
   }
