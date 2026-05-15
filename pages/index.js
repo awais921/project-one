@@ -15,13 +15,12 @@ export default function Home() {
   };
 
   const handleGenerate = async () => {
-    if (!imageFile) return;
+    if (!imageFile) return alert("Upload image first");
 
     setLoading(true);
     setResult(null);
 
     try {
-      // upload image to Cloudinary
       const formData = new FormData();
       formData.append("file", imageFile);
       formData.append("upload_preset", "project_one_upload");
@@ -37,7 +36,6 @@ export default function Home() {
       const cloudData = await cloudRes.json();
       const imageUrl = cloudData.secure_url;
 
-      // send to backend API
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: {
@@ -48,11 +46,14 @@ export default function Home() {
 
       const data = await res.json();
 
-      // 🔥 IMPORTANT LINE (RESULT SHOW)
-      setResult(data.result);
+      // 🔥 DEBUG LINE (important)
+      console.log("API RESPONSE:", data);
+
+      // result show
+      setResult(data.result || null);
 
     } catch (err) {
-      console.log(err);
+      console.log("ERROR:", err);
     }
 
     setLoading(false);
@@ -63,12 +64,10 @@ export default function Home() {
       
       <h1>AI Fashion Generator</h1>
 
-      {/* Upload */}
       <input type="file" accept="image/*" onChange={handleUpload} />
 
       <br /><br />
 
-      {/* Original Image */}
       {preview && (
         <div>
           <h3>Original Image</h3>
@@ -78,17 +77,14 @@ export default function Home() {
 
       <br />
 
-      {/* Button */}
       <button onClick={handleGenerate}>
         {loading ? "Generating..." : "Generate AI Fashion"}
       </button>
 
       <br /><br />
 
-      {/* Loading */}
       {loading && <p>Generating AI image...</p>}
 
-      {/* AI Result */}
       {result && (
         <div>
           <h3>AI Result</h3>
@@ -98,4 +94,4 @@ export default function Home() {
 
     </div>
   );
-  }
+    }
