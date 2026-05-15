@@ -7,10 +7,7 @@ export default async function handler(req, res) {
     const { image } = req.body;
 
     if (!image) {
-      return res.status(400).json({
-        success: false,
-        error: "Image is required",
-      });
+      return res.status(400).json({ success: false, error: "Image required" });
     }
 
     const replicateRes = await fetch(
@@ -27,7 +24,7 @@ export default async function handler(req, res) {
           input: {
             image,
             prompt:
-              "luxury fashion photoshoot, ultra realistic, cinematic lighting",
+              "luxury celebrity fashion photoshoot, ultra realistic, cinematic lighting",
           },
         }),
       }
@@ -38,26 +35,26 @@ export default async function handler(req, res) {
     if (!prediction?.urls?.get) {
       return res.status(500).json({
         success: false,
-        error: "Prediction URL missing",
+        error: "Prediction failed",
         debug: prediction,
       });
     }
 
-    let outputUrl = "";
+    let output = "";
 
     for (let i = 0; i < 20; i++) {
       await new Promise((r) => setTimeout(r, 2000));
 
-      const checkRes = await fetch(prediction.urls.get, {
+      const check = await fetch(prediction.urls.get, {
         headers: {
           Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
         },
       });
 
-      const result = await checkRes.json();
+      const result = await check.json();
 
       if (result.status === "succeeded") {
-        outputUrl = result.output?.[0];
+        output = result.output?.[0];
         break;
       }
 
@@ -65,14 +62,13 @@ export default async function handler(req, res) {
         return res.status(500).json({
           success: false,
           error: "Generation failed",
-          debug: result,
         });
       }
     }
 
     return res.status(200).json({
       success: true,
-      result: outputUrl,
+      result: output,
     });
   } catch (err) {
     return res.status(500).json({
