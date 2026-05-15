@@ -7,7 +7,10 @@ export default async function handler(req, res) {
     const { image } = req.body;
 
     if (!image) {
-      return res.status(400).json({ success: false, error: "Image required" });
+      return res.status(400).json({
+        success: false,
+        error: "Image is required",
+      });
     }
 
     const replicateRes = await fetch(
@@ -76,4 +79,4 @@ export default async function handler(req, res) {
       error: err.message,
     });
   }
-        }
+}
