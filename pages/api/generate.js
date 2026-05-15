@@ -1,6 +1,9 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      success: false,
+      error: "Method not allowed",
+    });
   }
 
   try {
@@ -13,7 +16,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const replicateRes = await fetch(
+    const response = await fetch(
       "https://api.replicate.com/v1/predictions",
       {
         method: "POST",
@@ -23,60 +26,68 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           version:
-            "ac732df83cea7fff0902a97d663e1a3a4b9c35f15f1f1ba3a5f5be4d2d7f1c52",
+            "39ed52f2a78e934c7d14df6f91e4c4c8f0e7cbdeb18f0bc33bd583a14bc58c6f",
           input: {
-            image,
+            image: image,
             prompt:
-              "luxury celebrity fashion photoshoot, ultra realistic, cinematic lighting",
+              "ultra realistic celebrity luxury fashion photoshoot, cinematic lighting, designer outfit, high fashion, detailed face",
           },
         }),
       }
     );
 
-    const prediction = await replicateRes.json();
+    const prediction = await response.json();
 
     if (!prediction?.urls?.get) {
       return res.status(500).json({
         success: false,
-        error: "Prediction failed",
-        debug: prediction,
+        error: "Failed to start prediction",
+        details: prediction,
       });
     }
 
-    let output = "";
+    let finalResult = null;
 
-    for (let i = 0; i < 20; i++) {
-      await new Promise((r) => setTimeout(r, 2000));
+    for (let i = 0; i < 30; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const check = await fetch(prediction.urls.get, {
+      const pollResponse = await fetch(prediction.urls.get, {
         headers: {
           Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
         },
       });
 
-      const result = await check.json();
+      const pollData = await pollResponse.json();
 
-      if (result.status === "succeeded") {
-        output = result.output?.[0];
+      if (pollData.status === "succeeded") {
+        finalResult = pollData.output?.[0];
         break;
       }
 
-      if (result.status === "failed") {
+      if (pollData.status === "failed") {
         return res.status(500).json({
           success: false,
-          error: "Generation failed",
+          error: "AI generation failed",
+          details: pollData,
         });
       }
     }
 
+    if (!finalResult) {
+      return res.status(500).json({
+        success: false,
+        error: "Generation timeout",
+      });
+    }
+
     return res.status(200).json({
       success: true,
-      result: output,
+      result: finalResult,
     });
-  } catch (err) {
+  } catch (error) {
     return res.status(500).json({
       success: false,
-      error: err.message,
+      error: error.message,
     });
   }
 }
