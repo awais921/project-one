@@ -10,6 +10,7 @@ export default function Home() {
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
+
     reader.onload = () => {
       setImage(reader.result);
     };
@@ -17,6 +18,7 @@ export default function Home() {
 
   const generateFashion = async () => {
     setLoading(true);
+    setResult(null);
 
     const res = await fetch("/api/generate", {
       method: "POST",
@@ -26,12 +28,36 @@ export default function Home() {
 
     const data = await res.json();
 
+    if (!data.success) {
+      setLoading(false);
+      alert(data.error);
+      return;
+    }
+
+    let prediction = data.data;
+
+    // 🔥 POLLING until done
+    while (
+      prediction.status !== "succeeded" &&
+      prediction.status !== "failed"
+    ) {
+      await new Promise((r) => setTimeout(r, 2000));
+
+      const poll = await fetch(prediction.urls.get, {
+        headers: {
+          Authorization: `Token ${process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN}`,
+        },
+      });
+
+      prediction = await poll.json();
+    }
+
     setLoading(false);
 
-    if (data.success) {
-      setResult(data.data);
+    if (prediction.status === "succeeded") {
+      setResult(prediction.output);
     } else {
-      alert(data.error);
+      alert("Generation failed");
     }
   };
 
@@ -42,21 +68,26 @@ export default function Home() {
       <input type="file" onChange={handleUpload} />
 
       {image && (
-        <img src={image} width={200} alt="upload" />
+        <div>
+          <h3>Uploaded Image</h3>
+          <img src={image} width={200} />
+        </div>
       )}
 
       <br />
 
-      <button onClick={generateFashion} disabled={loading}>
+      <button onClick={generateFashion} disabled={loading || !image}>
         {loading ? "Generating..." : "Generate AI Fashion"}
       </button>
 
-      {result && (
+      <hr />
+
+      {result && result[0] && (
         <div>
-          <h3>Result:</h3>
-          <pre>{JSON.stringify(result, null, 2)}</pre>
+          <h3>Result</h3>
+          <img src={result[0]} width={300} />
         </div>
       )}
     </div>
   );
-  }
+        }
