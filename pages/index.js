@@ -1,97 +1,62 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [imageFile, setImageFile] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleUpload = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
 
-    setImageFile(file);
-    setPreview(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      setImage(reader.result);
+    };
   };
 
-  const handleGenerate = async () => {
-    if (!imageFile) return alert("Upload image first");
-
+  const generateFashion = async () => {
     setLoading(true);
-    setResult(null);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", imageFile);
-      formData.append("upload_preset", "project_one_upload");
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image }),
+    });
 
-      const cloudRes = await fetch(
-        "https://api.cloudinary.com/v1_1/duhksrhsr/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const cloudData = await cloudRes.json();
-      const imageUrl = cloudData.secure_url;
-
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ image: imageUrl }),
-      });
-
-      const data = await res.json();
-
-      // 🔥 DEBUG LINE (important)
-      console.log("API RESPONSE:", data);
-
-      // result show
-      setResult(data.result || null);
-
-    } catch (err) {
-      console.log("ERROR:", err);
-    }
+    const data = await res.json();
 
     setLoading(false);
+
+    if (data.success) {
+      setResult(data.data);
+    } else {
+      alert(data.error);
+    }
   };
 
   return (
-    <div style={{ padding: 40, color: "white", background: "#111", minHeight: "100vh", textAlign: "center" }}>
-      
+    <div style={{ padding: 20 }}>
       <h1>AI Fashion Generator</h1>
 
-      <input type="file" accept="image/*" onChange={handleUpload} />
+      <input type="file" onChange={handleUpload} />
 
-      <br /><br />
-
-      {preview && (
-        <div>
-          <h3>Original Image</h3>
-          <img src={preview} width="220" />
-        </div>
+      {image && (
+        <img src={image} width={200} alt="upload" />
       )}
 
       <br />
 
-      <button onClick={handleGenerate}>
+      <button onClick={generateFashion} disabled={loading}>
         {loading ? "Generating..." : "Generate AI Fashion"}
       </button>
 
-      <br /><br />
-
-      {loading && <p>Generating AI image...</p>}
-
       {result && (
         <div>
-          <h3>AI Result</h3>
-          <img src={result} width="220" />
+          <h3>Result:</h3>
+          <pre>{JSON.stringify(result, null, 2)}</pre>
         </div>
       )}
-
     </div>
   );
-    }
+  }
