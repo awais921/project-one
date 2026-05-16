@@ -1,37 +1,63 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false });
+    return res.status(405).json({
+      success: false,
+      error: "Method not allowed",
+    });
   }
 
   try {
     const { image } = req.body;
 
     if (!image) {
-      return res.status(400).json({ success: false, error: "Image missing" });
+      return res.status(400).json({
+        success: false,
+        error: "No image provided",
+      });
     }
 
-    const response = await fetch("https://api.replicate.com/v1/predictions", {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        version: "db21e45e-38a0-4e65-9e3a-6b7a9d5c9c52",
-        input: {
-          image,
-          prompt: "fashion outfit, ultra realistic, runway model"
+    // CREATE PREDICTION
+    const createResponse = await fetch(
+      "https://api.replicate.com/v1/predictions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          version: "db21e45e-38a0-4e65-9e3a-6b7a9d5c9c52",
+          input: {
+            image: image,
+            prompt:
+              "A stylish modern fashion outfit, ultra realistic, high quality",
+          },
+        }),
+      }
+    );
 
-    let prediction = await response.json();
+    const prediction = await createResponse.json();
 
-    while (prediction.status !== "succeeded" && prediction.status !== "failed") {
-      await new Promise((r) => setTimeout(r, 2000));
+    console.log(prediction);
 
-      const poll = await fetch(
-        `https://api.replicate.com/v1/predictions/${prediction.id}`,
+    if (!prediction.id) {
+      return res.status(500).json({
+        success: false,
+        error: "Failed to start AI generation",
+      });
+    }
+
+    let result = prediction;
+
+    // POLLING
+    while (
+      result.status !== "succeeded" &&
+      result.status !== "failed"
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const pollResponse = await fetch(
+        `https://api.replicate.com/v1/predictions/${result.id}`,
         {
           headers: {
             Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
@@ -39,22 +65,27 @@ export default async function handler(req, res) {
         }
       );
 
-      prediction = await poll.json();
+      result = await pollResponse.json();
+
+      console.log(result);
     }
 
-    if (prediction.status === "failed") {
-      return res.status(500).json({ success: false, error: "Generation failed" });
+    if (result.status === "failed") {
+      return res.status(500).json({
+        success: false,
+        error: "AI generation failed",
+      });
     }
 
-    // 🔥 IMPORTANT FIX HERE
+    // OUTPUT FIX
     let outputImage = "";
 
-    if (Array.isArray(prediction.output)) {
-      outputImage = prediction.output[0];
-    } else if (typeof prediction.output === "string") {
-      outputImage = prediction.output;
-    } else if (prediction.output?.image) {
-      outputImage = prediction.output.image;
+    if (Array.isArray(result.output)) {
+      outputImage = result.output[0];
+    } else if (typeof result.output === "string") {
+      outputImage = result.output;
+    } else if (result.output?.image) {
+      outputImage = result.output.image;
     }
 
     return res.status(200).json({
@@ -62,10 +93,12 @@ export default async function handler(req, res) {
       output: outputImage,
     });
 
-  } catch (err) {
+  } catch (error) {
+    console.log(error);
+
     return res.status(500).json({
       success: false,
-      error: err.message,
+      error: error.message,
     });
   }
-        } 
+  }
