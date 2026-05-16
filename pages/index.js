@@ -2,92 +2,110 @@ import { useState } from "react";
 
 export default function Home() {
   const [image, setImage] = useState(null);
-  const [result, setResult] = useState(null);
+  const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
 
-  const handleUpload = (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
+    if (!file) return;
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-
-    reader.onload = () => {
-      setImage(reader.result);
-    };
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
+    setResult(null);
+    setError("");
   };
 
-  const generateFashion = async () => {
-    setLoading(true);
-    setResult(null);
-
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image }),
-    });
-
-    const data = await res.json();
-
-    if (!data.success) {
-      setLoading(false);
-      alert(data.error);
+  const handleGenerate = async () => {
+    if (!image) {
+      setError("Please upload an image first");
       return;
     }
 
-    let prediction = data.data;
+    setLoading(true);
+    setError("");
+    setResult(null);
 
-    // 🔥 POLLING until done
-    while (
-      prediction.status !== "succeeded" &&
-      prediction.status !== "failed"
-    ) {
-      await new Promise((r) => setTimeout(r, 2000));
+    const reader = new FileReader();
 
-      const poll = await fetch(prediction.urls.get, {
-        headers: {
-          Authorization: `Token ${process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN}`,
-        },
-      });
+    reader.onloadend = async () => {
+      try {
+        const base64 = reader.result;
 
-      prediction = await poll.json();
-    }
+        const res = await fetch("/api/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ image: base64 }),
+        });
 
-    setLoading(false);
+        const data = await res.json();
 
-    if (prediction.status === "succeeded") {
-      setResult(prediction.output);
-    } else {
-      alert("Generation failed");
-    }
+        if (data.success) {
+          setResult(data.output);
+        } else {
+          setError(data.error || "Something went wrong");
+        }
+      } catch (err) {
+        setError("Request failed");
+      }
+
+      setLoading(false);
+    };
+
+    reader.readAsDataURL(image);
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>AI Fashion Generator</h1>
+    <div style={styles.container}>
+      <h1 style={styles.title}>AI Fashion Generator</h1>
 
-      <input type="file" onChange={handleUpload} />
+      <input type="file" accept="image/*" onChange={handleImageChange} />
 
-      {image && (
+      {preview && (
         <div>
-          <h3>Uploaded Image</h3>
-          <img src={image} width={200} />
+          <h3>Preview</h3>
+          <img src={preview} style={styles.image} />
         </div>
       )}
 
-      <br />
-
-      <button onClick={generateFashion} disabled={loading || !image}>
-        {loading ? "Generating..." : "Generate AI Fashion"}
+      <button onClick={handleGenerate} style={styles.button}>
+        {loading ? "Generating..." : "Generate Fashion"}
       </button>
 
-      <hr />
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {result && result[0] && (
+      {result && (
         <div>
           <h3>Result</h3>
-          <img src={result[0]} width={300} />
+          <img src={result} style={styles.image} />
         </div>
       )}
     </div>
   );
-        }
+}
+
+const styles = {
+  container: {
+    textAlign: "center",
+    padding: "40px",
+    fontFamily: "Arial",
+  },
+  title: {
+    fontSize: "32px",
+    marginBottom: "20px",
+  },
+  image: {
+    width: "300px",
+    marginTop: "10px",
+    borderRadius: "10px",
+  },
+  button: {
+    marginTop: "20px",
+    padding: "10px 20px",
+    fontSize: "16px",
+    cursor: "pointer",
+  },
+};
