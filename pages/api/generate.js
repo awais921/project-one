@@ -1,67 +1,45 @@
 export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ success: false, error: "Method not allowed" });
+  }
+
   try {
     const { image } = req.body;
 
     if (!image) {
-      return res.status(400).json({ error: "Image is required" });
+      return res.status(400).json({ success: false, error: "Image is required" });
     }
 
-    // Step 1: Create prediction
     const response = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
-        Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+        "Authorization": `Token ${process.env.REPLICATE_API_TOKEN}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version:
-          "39ed52f2a78e934c7d14df6f91e4c4c8f0e7cbdeb18f0bc33bd583a14bc58c6f",
+        version: "stability-ai/sdxl", 
         input: {
           image: image,
-          prompt:
-            "ultra realistic celebrity luxury fashion photoshoot, designer outfit",
+          prompt: "High fashion outfit, professional model, studio lighting, ultra realistic",
         },
       }),
     });
 
-    let prediction = await response.json();
+    const data = await response.json();
 
-    if (!prediction.id) {
+    if (!response.ok) {
       return res.status(500).json({
-        error: "Prediction failed to start",
-        details: prediction,
+        success: false,
+        error: data?.detail || "Replicate API error",
       });
     }
 
-    // Step 2: Wait for result (Polling)
-    while (
-      prediction.status !== "succeeded" &&
-      prediction.status !== "failed"
-    ) {
-      await new Promise((r) => setTimeout(r, 2000));
-
-      const pollRes = await fetch(
-        `https://api.replicate.com/v1/predictions/${prediction.id}`,
-        {
-          headers: {
-            Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
-          },
-        }
-      );
-
-      prediction = await pollRes.json();
-    }
-
-    // Step 3: Final response
     return res.status(200).json({
       success: true,
-      result: prediction.output,
-      full: prediction,
+      data,
     });
 
   } catch (error) {
-    console.log("ERROR:", error);
-
     return res.status(500).json({
       success: false,
       error: error.message,
