@@ -1,13 +1,13 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false, error: "Method not allowed" });
+    return res.status(405).json({ success: false });
   }
 
   try {
     const { image } = req.body;
 
     if (!image) {
-      return res.status(400).json({ success: false, error: "Image is required" });
+      return res.status(400).json({ success: false, error: "Image missing" });
     }
 
     const response = await fetch("https://api.replicate.com/v1/predictions", {
@@ -19,21 +19,19 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         version: "db21e45e-38a0-4e65-9e3a-6b7a9d5c9c52",
         input: {
-          image: image,
-          prompt: "A stylish fashion outfit, high quality, runway model, ultra realistic"
+          image,
+          prompt: "fashion outfit, ultra realistic, runway model"
         },
       }),
     });
 
-    const prediction = await response.json();
+    let prediction = await response.json();
 
-    let result = prediction;
-
-    while (result.status !== "succeeded" && result.status !== "failed") {
+    while (prediction.status !== "succeeded" && prediction.status !== "failed") {
       await new Promise((r) => setTimeout(r, 2000));
 
       const poll = await fetch(
-        `https://api.replicate.com/v1/predictions/${result.id}`,
+        `https://api.replicate.com/v1/predictions/${prediction.id}`,
         {
           headers: {
             Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
@@ -41,24 +39,33 @@ export default async function handler(req, res) {
         }
       );
 
-      result = await poll.json();
+      prediction = await poll.json();
     }
 
-    if (result.status === "failed") {
-      return res.status(500).json({
-        success: false,
-        error: "AI generation failed",
-      });
+    if (prediction.status === "failed") {
+      return res.status(500).json({ success: false, error: "Generation failed" });
+    }
+
+    // 🔥 IMPORTANT FIX HERE
+    let outputImage = "";
+
+    if (Array.isArray(prediction.output)) {
+      outputImage = prediction.output[0];
+    } else if (typeof prediction.output === "string") {
+      outputImage = prediction.output;
+    } else if (prediction.output?.image) {
+      outputImage = prediction.output.image;
     }
 
     return res.status(200).json({
       success: true,
-      output: result.output,
+      output: outputImage,
     });
-  } catch (error) {
+
+  } catch (err) {
     return res.status(500).json({
       success: false,
-      error: error.message,
+      error: err.message,
     });
   }
-                                    }
+        } 
