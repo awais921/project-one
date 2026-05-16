@@ -16,8 +16,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // CREATE PREDICTION
-    const createResponse = await fetch(
+    // CREATE AI REQUEST
+    const response = await fetch(
       "https://api.replicate.com/v1/predictions",
       {
         method: "POST",
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          version: "db21e45e-38a0-4e65-9e3a-6b7a9d5c9c52",
+          version: "ac732df83cea7fffcbfce4029cb304e7a255c9d7",
           input: {
             image: image,
             prompt:
@@ -36,10 +36,11 @@ export default async function handler(req, res) {
       }
     );
 
-    const prediction = await createResponse.json();
+    let prediction = await response.json();
 
     console.log(prediction);
 
+    // CHECK START
     if (!prediction.id) {
       return res.status(500).json({
         success: false,
@@ -47,17 +48,15 @@ export default async function handler(req, res) {
       });
     }
 
-    let result = prediction;
-
-    // POLLING
+    // WAIT FOR RESULT
     while (
-      result.status !== "succeeded" &&
-      result.status !== "failed"
+      prediction.status !== "succeeded" &&
+      prediction.status !== "failed"
     ) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const pollResponse = await fetch(
-        `https://api.replicate.com/v1/predictions/${result.id}`,
+        `https://api.replicate.com/v1/predictions/${prediction.id}`,
         {
           headers: {
             Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
@@ -65,12 +64,13 @@ export default async function handler(req, res) {
         }
       );
 
-      result = await pollResponse.json();
+      prediction = await pollResponse.json();
 
-      console.log(result);
+      console.log(prediction);
     }
 
-    if (result.status === "failed") {
+    // FAILED
+    if (prediction.status === "failed") {
       return res.status(500).json({
         success: false,
         error: "AI generation failed",
@@ -80,12 +80,12 @@ export default async function handler(req, res) {
     // OUTPUT FIX
     let outputImage = "";
 
-    if (Array.isArray(result.output)) {
-      outputImage = result.output[0];
-    } else if (typeof result.output === "string") {
-      outputImage = result.output;
-    } else if (result.output?.image) {
-      outputImage = result.output.image;
+    if (Array.isArray(prediction.output)) {
+      outputImage = prediction.output[0];
+    } else if (typeof prediction.output === "string") {
+      outputImage = prediction.output;
+    } else if (prediction.output?.image) {
+      outputImage = prediction.output.image;
     }
 
     return res.status(200).json({
@@ -101,4 +101,4 @@ export default async function handler(req, res) {
       error: error.message,
     });
   }
-  }
+          }
