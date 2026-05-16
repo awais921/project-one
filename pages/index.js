@@ -9,6 +9,7 @@ export default function Home() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
+
     if (!file) return;
 
     setImage(file);
@@ -27,35 +28,48 @@ export default function Home() {
     setError("");
     setResult(null);
 
-    const reader = new FileReader();
+    try {
+      const reader = new FileReader();
 
-    reader.onloadend = async () => {
-      try {
-        const base64 = reader.result;
+      reader.onloadend = async () => {
+        try {
+          const base64 = reader.result;
 
-        const res = await fetch("/api/generate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ image: base64 }),
-        });
+          const response = await fetch("/api/generate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              image: base64,
+            }),
+          });
 
-        const data = await res.json();
+          const data = await response.json();
 
-        if (data.success) {
-          setResult(data.output); // 🔥 final image URL
-        } else {
-          setError(data.error || "Something went wrong");
+          console.log(data);
+
+          if (data.success) {
+            setResult(data.output);
+          } else {
+            setError(data.error || "Generation failed");
+          }
+
+        } catch (err) {
+          console.log(err);
+          setError("API request failed");
         }
-      } catch (err) {
-        setError("Request failed");
-      }
 
+        setLoading(false);
+      };
+
+      reader.readAsDataURL(image);
+
+    } catch (err) {
+      console.log(err);
+      setError("Something went wrong");
       setLoading(false);
-    };
-
-    reader.readAsDataURL(image);
+    }
   };
 
   return (
@@ -66,25 +80,31 @@ export default function Home() {
         Upload your photo and generate AI fashion outfit
       </p>
 
-      <input type="file" accept="image/*" onChange={handleImageChange} />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+      />
 
       {preview && (
         <div style={{ marginTop: 20 }}>
-          <h3>Original Image</h3>
-          <img src={preview} style={styles.image} />
+          <h3>Preview</h3>
+          <img src={preview} alt="preview" style={styles.image} />
         </div>
       )}
 
       <button onClick={handleGenerate} style={styles.button}>
-        {loading ? "Generating AI Fashion..." : "Generate Fashion"}
+        {loading ? "Generating..." : "Generate Fashion"}
       </button>
 
-      {error && <p style={styles.error}>{error}</p>}
+      {error && (
+        <p style={styles.error}>{error}</p>
+      )}
 
       {result && (
         <div style={{ marginTop: 20 }}>
           <h3>AI Result</h3>
-          <img src={result} style={styles.image} />
+          <img src={result} alt="result" style={styles.image} />
         </div>
       )}
     </div>
@@ -95,37 +115,41 @@ const styles = {
   container: {
     textAlign: "center",
     padding: "40px",
-    fontFamily: "Arial",
-    background: "#0f0f0f",
-    color: "white",
     minHeight: "100vh",
+    background: "#111",
+    color: "#fff",
+    fontFamily: "Arial",
   },
+
   title: {
-    fontSize: "34px",
+    fontSize: "36px",
     marginBottom: "10px",
   },
+
   subtitle: {
-    marginBottom: "20px",
     opacity: 0.7,
+    marginBottom: "20px",
   },
+
   image: {
     width: "300px",
-    marginTop: "10px",
     borderRadius: "12px",
-    boxShadow: "0 0 15px rgba(255,255,255,0.2)",
+    marginTop: "10px",
   },
+
   button: {
     marginTop: "20px",
-    padding: "12px 25px",
-    fontSize: "16px",
-    cursor: "pointer",
-    borderRadius: "8px",
+    padding: "12px 24px",
     border: "none",
+    borderRadius: "8px",
     background: "#ff2d55",
-    color: "white",
+    color: "#fff",
+    cursor: "pointer",
+    fontSize: "16px",
   },
+
   error: {
     color: "red",
-    marginTop: "10px",
+    marginTop: "15px",
   },
 };
