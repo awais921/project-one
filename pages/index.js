@@ -44,7 +44,7 @@ export default function Home() {
         const data = await res.json();
 
         if (data.success) {
-          setResult(data.output);
+          setResult(data.output); // 🔥 final image URL
         } else {
           setError(data.error || "Something went wrong");
         }
@@ -62,24 +62,28 @@ export default function Home() {
     <div style={styles.container}>
       <h1 style={styles.title}>AI Fashion Generator</h1>
 
+      <p style={styles.subtitle}>
+        Upload your photo and generate AI fashion outfit
+      </p>
+
       <input type="file" accept="image/*" onChange={handleImageChange} />
 
       {preview && (
-        <div>
-          <h3>Preview</h3>
+        <div style={{ marginTop: 20 }}>
+          <h3>Original Image</h3>
           <img src={preview} style={styles.image} />
         </div>
       )}
 
       <button onClick={handleGenerate} style={styles.button}>
-        {loading ? "Generating..." : "Generate Fashion"}
+        {loading ? "Generating AI Fashion..." : "Generate Fashion"}
       </button>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={styles.error}>{error}</p>}
 
       {result && (
-        <div>
-          <h3>Result</h3>
+        <div style={{ marginTop: 20 }}>
+          <h3>AI Result</h3>
           <img src={result} style={styles.image} />
         </div>
       )}
@@ -92,20 +96,36 @@ const styles = {
     textAlign: "center",
     padding: "40px",
     fontFamily: "Arial",
+    background: "#0f0f0f",
+    color: "white",
+    minHeight: "100vh",
   },
   title: {
-    fontSize: "32px",
+    fontSize: "34px",
+    marginBottom: "10px",
+  },
+  subtitle: {
     marginBottom: "20px",
+    opacity: 0.7,
   },
   image: {
     width: "300px",
     marginTop: "10px",
-    borderRadius: "10px",
+    borderRadius: "12px",
+    boxShadow: "0 0 15px rgba(255,255,255,0.2)",
   },
   button: {
     marginTop: "20px",
-    padding: "10px 20px",
+    padding: "12px 25px",
     fontSize: "16px",
     cursor: "pointer",
+    borderRadius: "8px",
+    border: "none",
+    background: "#ff2d55",
+    color: "white",
+  },
+  error: {
+    color: "red",
+    marginTop: "10px",
   },
 };
