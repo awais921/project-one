@@ -17,26 +17,18 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: "stability-ai/sdxl", 
+        version: "YOUR_MODEL_VERSION_ID",
         input: {
           image: image,
-          prompt: "High fashion outfit, professional model, studio lighting, ultra realistic",
         },
       }),
     });
 
     const data = await response.json();
 
-    if (!response.ok) {
-      return res.status(500).json({
-        success: false,
-        error: data?.detail || "Replicate API error",
-      });
-    }
-
     return res.status(200).json({
       success: true,
-      data,
+      output: data,
     });
 
   } catch (error) {
@@ -45,4 +37,4 @@ export default async function handler(req, res) {
       error: error.message,
     });
   }
-        }
+      }
