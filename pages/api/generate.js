@@ -18,17 +18,11 @@ export default async function handler(req, res) {
 
     if (!image) {
       return res.status(400).json({
-        error: "No image provided",
+        error: "No image uploaded",
       });
     }
 
-    // Remove base64 header
-    const base64Data = image.replace(
-      /^data:image\/\w+;base64,/,
-      ""
-    );
-
-    // Start prediction
+    // START REPLICATE REQUEST
     const response = await fetch(
       "https://api.replicate.com/v1/predictions",
       {
@@ -39,12 +33,12 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           version:
-            "db21e45bda4f4f8b3f8f0fd52c4c7f1fcbf8f4b5d6d7e8f9a0b1c2d3e4f5a6b",
+            "ac732df83cea7fffcbfce6e2c0b4b9d0d0f4b8f84dedec5c6e2f6f5d9b6f9c2a",
 
           input: {
-            image: `data:image/png;base64,${base64Data}`,
+            image: image,
             prompt:
-              "High fashion luxury outfit, modern celebrity fashion style, professional fashion photography",
+              "Luxury celebrity fashion outfit, modern fashion style, realistic professional fashion photography",
           },
         }),
       }
@@ -52,67 +46,28 @@ export default async function handler(req, res) {
 
     const prediction = await response.json();
 
-    console.log("Replicate response:", prediction);
+    console.log("Prediction:", prediction);
 
-    // Error from Replicate
-    if (prediction.detail || prediction.error) {
+    // ERROR CHECK
+    if (prediction.error || prediction.detail) {
       return res.status(500).json({
         error:
-          prediction.detail ||
           prediction.error ||
-          "Replicate API failed",
+          prediction.detail ||
+          "Replicate API Error",
       });
     }
 
-    // Prediction ID missing
-    if (!prediction.id) {
-      return res.status(500).json({
-        error: "Prediction ID not returned",
-      });
-    }
-
-    // Wait for result
-    let result = prediction;
-
-    for (let i = 0; i < 15; i++) {
-      await new Promise((resolve) =>
-        setTimeout(resolve, 2000)
-      );
-
-      const checkResponse = await fetch(
-        `https://api.replicate.com/v1/predictions/${prediction.id}`,
-        {
-          headers: {
-            Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
-          },
-        }
-      );
-
-      result = await checkResponse.json();
-
-      console.log("Prediction status:", result.status);
-
-      if (result.status === "succeeded") {
-        return res.status(200).json({
-          output: result.output,
-        });
-      }
-
-      if (result.status === "failed") {
-        return res.status(500).json({
-          error: "AI generation failed",
-        });
-      }
-    }
-
-    return res.status(500).json({
-      error: "Generation timeout",
+    // SUCCESS
+    return res.status(200).json({
+      output: prediction,
     });
+
   } catch (error) {
-    console.error("Server Error:", error);
+    console.log("Server Error:", error);
 
     return res.status(500).json({
-      error: error.message || "Internal server error",
+      error: error.message || "Internal Server Error",
     });
   }
 }
