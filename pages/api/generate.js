@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get latest SDXL version
+    // Get latest SDXL model version
     const modelResponse = await fetch(
       "https://api.replicate.com/v1/models/stability-ai/sdxl",
       {
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
 
     const latestVersion = modelData.latest_version.id;
 
-    // Create prediction
+    // Create AI prediction
     const predictionResponse = await fetch(
       "https://api.replicate.com/v1/predictions",
       {
@@ -44,20 +44,20 @@ export default async function handler(req, res) {
 
           input: {
             prompt:
-              "Luxury modern fashion outfit, ultra realistic, stylish clothing, fashion photography, 4k",
+              "Luxury modern fashion outfit, stylish clothes, ultra realistic fashion photography, 4k",
           },
         }),
       }
     );
 
-    const predictionData = await predictionResponse.json();
+    const data = await predictionResponse.json();
 
+    // Send output back to frontend
     return res.status(200).json({
       success: true,
-      id: predictionData.id,
-      status: predictionData.status,
-      urls: predictionData.urls,
+      output: data?.urls?.get || null,
     });
+
   } catch (error) {
     return res.status(500).json({
       success: false,
