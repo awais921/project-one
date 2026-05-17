@@ -42,8 +42,7 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          version:
-            "db21e45b3f6ab3a14b5b7d1b5d5a2d61c6f45b8f0b9b5bdb7f3f4e6d7c1a2b3",
+          version: "PUT_YOUR_WORKING_MODEL_VERSION_HERE",
           input: {
             image: image,
             prompt:
@@ -55,12 +54,10 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    console.log("REPLICATE RESPONSE:", data);
-
-    if (data.detail || data.error) {
+    if (!response.ok) {
       return res.status(500).json({
         success: false,
-        error: data.detail || data.error,
+        error: data.detail || data.error || "Replicate API error",
       });
     }
 
@@ -71,8 +68,6 @@ export default async function handler(req, res) {
       urls: data.urls,
     });
   } catch (error) {
-    console.log("SERVER ERROR:", error);
-
     return res.status(500).json({
       success: false,
       error: error.message,
