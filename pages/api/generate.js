@@ -42,11 +42,11 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          version: "ac7329d83f8a1b9c3f4d9e2a", 
+          version: "YOUR_REAL_MODEL_VERSION_FROM_REPLICATE",
           input: {
-            image: image,
+            image,
             prompt:
-              "Luxury modern fashion outfit, realistic, stylish clothing, high quality fashion photography",
+              "ultra realistic fashion photoshoot, luxury outfit, modern stylish clothing, high quality, 4k",
           },
         }),
       }
