@@ -43,7 +43,8 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           version:
-            "ac732df83cea7fffcbfce61fe3d7f4de8c2a6d79c5b2e6d3f6f5a6c2bc7d2f84",
+            "db21e45b3f6ab3a14b5b7d1b5d5a2d61c6f45b8f0b9b5bdb7f3f4e6d7c1a2b3",
+
           input: {
             image: image,
             prompt:
@@ -78,4 +79,4 @@ export default async function handler(req, res) {
       error: error.message,
     });
   }
-}
+  }
