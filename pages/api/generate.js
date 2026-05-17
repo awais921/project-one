@@ -1,67 +1,118 @@
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "10mb",
+    },
+  },
+};
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
-      success: false,
       error: "Method not allowed",
     });
   }
 
   try {
-    const token = process.env.REPLICATE_API_TOKEN;
+    const { image } = req.body;
 
-    if (!token) {
-      return res.status(500).json({
-        success: false,
-        error: "Missing REPLICATE_API_TOKEN",
+    if (!image) {
+      return res.status(400).json({
+        error: "No image provided",
       });
     }
 
-    // Get latest SDXL model version
-    const modelResponse = await fetch(
-      "https://api.replicate.com/v1/models/stability-ai/sdxl",
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      }
+    // Remove base64 header
+    const base64Data = image.replace(
+      /^data:image\/\w+;base64,/,
+      ""
     );
 
-    const modelData = await modelResponse.json();
-
-    const latestVersion = modelData.latest_version.id;
-
-    // Create AI prediction
-    const predictionResponse = await fetch(
+    // Start prediction
+    const response = await fetch(
       "https://api.replicate.com/v1/predictions",
       {
         method: "POST",
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          version: latestVersion,
+          version:
+            "db21e45bda4f4f8b3f8f0fd52c4c7f1fcbf8f4b5d6d7e8f9a0b1c2d3e4f5a6b",
 
           input: {
+            image: `data:image/png;base64,${base64Data}`,
             prompt:
-              "Luxury modern fashion outfit, stylish clothes, ultra realistic fashion photography, 4k",
+              "High fashion luxury outfit, modern celebrity fashion style, professional fashion photography",
           },
         }),
       }
     );
 
-    const data = await predictionResponse.json();
+    const prediction = await response.json();
 
-    // Send output back to frontend
-    return res.status(200).json({
-      success: true,
-      output: data?.urls?.get || null,
-    });
+    console.log("Replicate response:", prediction);
 
-  } catch (error) {
+    // Error from Replicate
+    if (prediction.detail || prediction.error) {
+      return res.status(500).json({
+        error:
+          prediction.detail ||
+          prediction.error ||
+          "Replicate API failed",
+      });
+    }
+
+    // Prediction ID missing
+    if (!prediction.id) {
+      return res.status(500).json({
+        error: "Prediction ID not returned",
+      });
+    }
+
+    // Wait for result
+    let result = prediction;
+
+    for (let i = 0; i < 15; i++) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, 2000)
+      );
+
+      const checkResponse = await fetch(
+        `https://api.replicate.com/v1/predictions/${prediction.id}`,
+        {
+          headers: {
+            Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+          },
+        }
+      );
+
+      result = await checkResponse.json();
+
+      console.log("Prediction status:", result.status);
+
+      if (result.status === "succeeded") {
+        return res.status(200).json({
+          output: result.output,
+        });
+      }
+
+      if (result.status === "failed") {
+        return res.status(500).json({
+          error: "AI generation failed",
+        });
+      }
+    }
+
     return res.status(500).json({
-      success: false,
-      error: error.message,
+      error: "Generation timeout",
+    });
+  } catch (error) {
+    console.error("Server Error:", error);
+
+    return res.status(500).json({
+      error: error.message || "Internal server error",
     });
   }
 }
