@@ -1,10 +1,11 @@
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '10mb',
+      sizeLimit: "10mb",
     },
   },
 };
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
@@ -23,7 +24,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check token
     const token = process.env.REPLICATE_API_TOKEN;
 
     if (!token) {
@@ -33,30 +33,30 @@ export default async function handler(req, res) {
       });
     }
 
-    // Start AI request
-    const response = await fetch("https://api.replicate.com/v1/predictions", {
-      method: "POST",
-      headers: {
-        Authorization: `Token ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        version:
-          "ac732df83cea7fffcbfce61fe3d7f4de8c2a6d79c5b2e6d3f6f5a6c2bc7d2f84",
-
-        input: {
-          image: image,
-          prompt:
-            "Luxury modern fashion outfit, realistic, stylish clothing, high quality fashion photography",
+    const response = await fetch(
+      "https://api.replicate.com/v1/predictions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          version:
+            "ac732df83cea7fffcbfce61fe3d7f4de8c2a6d79c5b2e6d3f6f5a6c2bc7d2f84",
+          input: {
+            image: image,
+            prompt:
+              "Luxury modern fashion outfit, realistic, stylish clothing, high quality fashion photography",
+          },
+        }),
+      }
+    );
 
     const data = await response.json();
 
     console.log("REPLICATE RESPONSE:", data);
 
-    // Error from replicate
     if (data.detail || data.error) {
       return res.status(500).json({
         success: false,
@@ -78,4 +78,4 @@ export default async function handler(req, res) {
       error: error.message,
     });
   }
-  }
+}
