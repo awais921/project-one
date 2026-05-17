@@ -44,7 +44,6 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           version:
             "db21e45b3f6ab3a14b5b7d1b5d5a2d61c6f45b8f0b9b5bdb7f3f4e6d7c1a2b3",
-
           input: {
             image: image,
             prompt:
