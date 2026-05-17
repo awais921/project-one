@@ -42,7 +42,7 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          version: "PUT_YOUR_WORKING_MODEL_VERSION_HERE",
+          version: "ac7329d83f8a1b9c3f4d9e2a", 
           input: {
             image: image,
             prompt:
