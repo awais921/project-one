@@ -22,9 +22,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // START REPLICATE REQUEST
     const response = await fetch(
-      "https://api.replicate.com/v1/predictions",
+      "https://api.replicate.com/v1/models/stability-ai/sdxl/predictions",
       {
         method: "POST",
         headers: {
@@ -32,42 +31,34 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          version:
-            "ac732df83cea7fffcbfce6e2c0b4b9d0d0f4b8f84dedec5c6e2f6f5d9b6f9c2a",
-
           input: {
-            image: image,
             prompt:
-              "Luxury celebrity fashion outfit, modern fashion style, realistic professional fashion photography",
+              "Luxury celebrity fashion outfit, modern fashion style, realistic professional photography",
           },
         }),
       }
     );
 
-    const prediction = await response.json();
+    const data = await response.json();
 
-    console.log("Prediction:", prediction);
+    console.log(data);
 
-    // ERROR CHECK
-    if (prediction.error || prediction.detail) {
+    if (data.error || data.detail) {
       return res.status(500).json({
         error:
-          prediction.error ||
-          prediction.detail ||
+          data.error ||
+          data.detail ||
           "Replicate API Error",
       });
     }
 
-    // SUCCESS
-    return res.status(200).json({
-      output: prediction,
-    });
+    return res.status(200).json(data);
 
   } catch (error) {
-    console.log("Server Error:", error);
+    console.log(error);
 
     return res.status(500).json({
-      error: error.message || "Internal Server Error",
+      error: error.message,
     });
   }
 }
