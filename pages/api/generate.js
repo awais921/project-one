@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     }
 
     const response = await fetch(
-      "https://api.replicate.com/v1/models/stability-ai/sdxl/predictions",
+      "https://api.replicate.com/v1/predictions",
       {
         method: "POST",
         headers: {
@@ -31,6 +31,8 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          version:
+            "7762fd07cf82c9485582489c2b0d8f4cb7f8f7966b3f3a7f4d8f4f8b4d5e6c1d",
           input: {
             prompt:
               "Luxury celebrity fashion outfit, modern fashion style, realistic professional photography",
