@@ -32,10 +32,12 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           version:
-            "7762fd07cf82c9485582489c2b0d8f4cb7f8f7966b3f3a7f4d8f4f8b4d5e6c1d",
+            "39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
           input: {
             prompt:
               "Luxury celebrity fashion outfit, modern fashion style, realistic professional photography",
+            image: image,
+            prompt_strength: 0.8,
           },
         }),
       }
@@ -47,10 +49,7 @@ export default async function handler(req, res) {
 
     if (data.error || data.detail) {
       return res.status(500).json({
-        error:
-          data.error ||
-          data.detail ||
-          "Replicate API Error",
+        error: data.error || data.detail || "Replicate API Error",
       });
     }
 
